@@ -1,0 +1,69 @@
+#!/bin/bash
+#SBATCH --job-name=present_APRIL
+#SBATCH -p mpp
+#SBATCH --ntasks=432 #!288
+#SBATCH --time=09:00:00
+#SBATCH -o slurm-out.out
+#SBATCH -e slurm-err.out
+
+set -x
+
+ulimit -s unlimited
+
+###
+read -r -d '' AWI_FESOM_YAML << 'EOF_AWI_FESOM_YAML'
+---
+output_schedules:
+  - vars: []
+    unit: y
+    rate: 1
+  - vars: [diags3d01,diags3d02,CO2y,aCO2,CO2,pH,pCO2,HCO3,CO3,OmegaC,kspc,rhoSW,PAR,rDIN,rDON,rDOC,rDSi,NPPn,NPPd,NPPc,GPPn,GPPd,GPPc,NNAn,NNAd,NNAc,GNAn,GNAd,GNAc,ResP,ResD,ResC,benCalc,benSi,benC,benN,denb,aN, aFe, Hp,CO2f,dpCO2s,pCO2s,bgc01,bgc02,bgc03,bgc04,bgc05,bgc06,bgc07,bgc08,bgc09,bgc10,bgc11,bgc12,bgc13,bgc14,bgc15,bgc16,bgc17,bgc18,bgc19,bgc20,bgc21,bgc22,bgc23,bgc24,bgc25,bgc26,bgc27,bgc28,bgc29,bgc30,bgc31,mlotst,omldamax,sic,slp,sithick,sitimefrac,so,sos,tauuo,tauvo,thetao,tos,zos,flice,wnet,evap,runoff,Kw,alphaCO2,O2f,NPPphy3d,NPPdia3d,NPPcoc3d,GPPphy3d,GPPdia3d,GPPcoc3d,NNAsphy3d,NNAsdia3d,NNAscoc3d,GNAsphy3d,GNAsdia3d,GNAscoc3d,TotGraz3d,GRAZphy3d,GRAZdia3d,GRAZcoc3d,RESzoo3d,calcdiss,AGGphy3d,AGGdia3d,AGGcoc3d,EXCphy3d,EXCdia3d,EXCcoc3d,calcif3d,RESphy3d,RESdia3d,REScoc3d,Nutlim_phy,Nutlim_dia,Nutlim_cocco,Tlim_arr,Tlim_cocco,Llim_phy,Llim_dia,Llim_cocco,CO2lim_phy,CO2lim_dia,CO2lim_cocco,PR_phy,PR_dia,PR_cocco,Cal_Tlim,Cal_CO2lim,Cal_Nlim,Cal_pure]
+    unit: m
+    rate: 1
+  - vars: []
+    unit: s
+    rate: 96
+  - vars: [restart]
+    unit: y
+    first: 1
+    rate: 1
+  - vars: [tso,lwrd,olat,olwout,osen,relax_salt,shum,tair,uwind,vwind,evs,fsitherm,hfds,opottemptend,pbo,prlq,prsn,rsdo,siarean,siareas,sidmassevapsubl,sidmasssi,sidmassth,sidmasstranx,sidmasstrany,siextentn,siextents,sifllatstop,sisnconc,sisnmass,sisnthick,sispeed,sivol,sivoln,sivols,soga,thetaoga,u2o,uo,uso,uto,v2o,vo,volo,vso,vto,w2o,wfo,wo,wso,wto,zossq,rho,uhice,uhsnow,urho,uv,vhice,vhsnow,virtual_salt,vrho,sistrxdtop,sistrxubot,sistrydtop,sistryubot,siu,siv,thdgr,thdgrsn]
+    unit: y
+    first: 1000
+    rate: 1
+EOF_AWI_FESOM_YAML
+export AWI_FESOM_YAML
+###
+
+# determine JOBID
+JOBID=`echo $SLURM_JOB_ID |cut -d"." -f1`
+
+#source ../env.sh
+#cp ../build/fesom_cpl/fesom .
+cp ./fesom .
+
+date
+srun --mpi=pmi2 fesom > "fesom.out"
+date
+# qstat -f $PBS_JOBID
+
+#export EXITSTATUS=$?
+#if [ ${EXITSTATUS} -eq 0 ] || [ ${EXITSTATUS} -eq 127 ] ; then
+#sbatch job.ll_ollie
+#fi
+
+## exit after 2009
+Resultpath='/work/ollie/mseifert/fesom/fesom-1.4-recom/present_APRIL/'
+test -e $Resultpath/fesom.1975.oce.nc && exit
+
+IsInFile=$( tail -1 fesom.out | grep -c successfully)
+if (( IsInFile > 0 )); then
+ ## submit next job                                                                                                                                                                                           
+ echo "submitting next job"
+ sbatch job_ollie
+else
+ echo "something is wrong, last line of fesom.out reads"
+ echo $( tail -1 fesom.out)
+ echo "abnormal termination of job script"
+fi
+
