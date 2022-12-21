@@ -3,7 +3,7 @@ Code of the Regulated Ecosystem Model (REcoM) for coupling with the Finite Eleme
 
 Code descriptions in Hauck et al. 2013 (doi:10.1002/2013GB004600), Karakus et al. 2021 (doi:10.1029/2021JC017315), and Seifert et al. 2022 (doi:10.1525/elementa.2021.00104).
 
-The code was used in the simulations of Seifert et al. 2022 (doi:10.1525/elementa.2021.00104) and referred to in OceanNETs deliverable 4.5.
+The code was used in the simulations of Seifert et al. 2022 (doi:10.1525/elementa.2021.00104) and referred to in OceanNETs deliverable 4.5 (*).
 
 
 
@@ -37,3 +37,4 @@ For questions, please contact Miriam Seifert (miriam.seifert@awi.de) or Judith H
 Bremerhaven (Germany), 19 December 2022
 
 
+(*) European Union’s Horizon 2020 research and innovation program under grant agree- ment number 869357 (project OceanNETs: Ocean-based Negative Emission Technologies—analyzing the feasibility, risks, and co-benefits of ocean-based negative emission technologies for stabilizing the climate). The work reflects only the authors' views; the European Commission and their executive agency are not responsible for any use that may be made of the information the work contains.
